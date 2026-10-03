@@ -1,0 +1,4 @@
+# Optional: lets https://jitpack.io build tags of this repository
+# (coordinates then become com.github.notsogeek87:lielugit-updater:<tag>).
+jdk:
+  - openjdk17

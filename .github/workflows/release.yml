@@ -1,0 +1,104 @@
+name: Release
+
+# Push a tag such as v1.0.0 to build, test and publish that version.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version from the tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
+            echo "::error::Tag '$TAG' is not a Semantic Version like v1.2.3 or v1.2.3-rc.1"
+            exit 1
+          fi
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: gradle/actions/wrapper-validation@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Any failing test stops the workflow here: no release job runs.
+      - name: Run unit tests
+        run: ./gradlew :lielugit-updater:testDebugUnitTest -PVERSION_NAME=${{ steps.version.outputs.version }} --stacktrace
+
+      - name: Build the AAR and a local Maven repository
+        run: |
+          ./gradlew :lielugit-updater:assembleRelease \
+            :lielugit-updater:publishReleasePublicationToMavenLocal \
+            -PVERSION_NAME=${{ steps.version.outputs.version }} --stacktrace
+          mkdir -p dist
+          cp lielugit-updater/build/outputs/aar/lielugit-updater-release.aar \
+             "dist/lielugit-updater-${{ steps.version.outputs.version }}.aar"
+          (cd ~/.m2/repository && zip -r "$GITHUB_WORKSPACE/dist/lielugit-updater-${{ steps.version.outputs.version }}-maven.zip" com/lielu/lielugit-updater)
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    name: GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Create the GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: dist/*
+          generate_release_notes: true
+          prerelease: ${{ contains(needs.build.outputs.version, '-') }}
+
+  publish-maven:
+    name: Publish to Maven (GitHub Packages)
+    needs: build
+    # Opt-in: set the repository variable MAVEN_PUBLISH_ENABLED to "true"
+    # (Settings > Secrets and variables > Actions > Variables).
+    if: ${{ vars.MAVEN_PUBLISH_ENABLED == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Publish
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./gradlew :lielugit-updater:publishReleasePublicationToGitHubPackagesRepository -PVERSION_NAME=${{ needs.build.outputs.version }} --stacktrace

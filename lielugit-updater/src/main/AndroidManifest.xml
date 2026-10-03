@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Needed to query/obtain the "Install unknown apps" authorization. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application>
+        <!--
+            Dedicated FileProvider so the library never conflicts with a FileProvider
+            declared by the host app. ${applicationId} is resolved by the manifest merger.
+        -->
+        <provider
+            android:name="com.lielu.githubupdater.UpdaterFileProvider"
+            android:authorities="${applicationId}.lielugit.updater.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/lielugit_updater_file_paths" />
+        </provider>
+    </application>
+</manifest>

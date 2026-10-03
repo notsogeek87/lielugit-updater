@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Must match ApkDownloader.DIRECTORY_NAME (inside Context.getCacheDir()). -->
+    <cache-path name="lielugit_updates" path="lielugit-updates/" />
+</paths>
