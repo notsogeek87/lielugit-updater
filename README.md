@@ -43,7 +43,7 @@ Each application picks the exact version of the library it uses.
 ### From a Maven repository (GitHub Packages)
 
 Released versions are published as `com.lielu:lielugit-updater:<version>` to GitHub Packages
-(when the maintainer enabled it, see [Publishing](#publishing-a-release-maintainers)).
+(automatically, see [Publishing](#publishing-a-release-maintainers)).
 
 ```kotlin
 // settings.gradle.kts of the app
@@ -399,8 +399,7 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md).
 3. The **Release** workflow runs the tests, builds the AAR, then creates the GitHub Release with
    `lielugit-updater-1.0.0.aar` and `lielugit-updater-1.0.0-maven.zip`. No release is created if a test fails.
    The Gradle version is taken from the tag (`-PVERSION_NAME=1.0.0`); `VERSION_NAME` in `gradle.properties` only matters for local builds.
-4. To also publish to Maven (GitHub Packages) set the repository **variable** `MAVEN_PUBLISH_ENABLED` to `true`
-   (Settings → Secrets and variables → Actions → Variables). The workflow uses the built-in `GITHUB_TOKEN`.
+4. The same workflow publishes `com.lielu:lielugit-updater:<version>` to GitHub Packages with the built-in `GITHUB_TOKEN` (no setup needed).
 
 To publish to Maven Central instead you need a Sonatype account, a verified `com.lielu` namespace and PGP signing; the POM metadata is already prepared in `gradle.properties`.
 

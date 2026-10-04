@@ -107,9 +107,6 @@ jobs:
   publish-maven:
     name: Publish to Maven (GitHub Packages)
     needs: build
-    # Opt-in: set the repository variable MAVEN_PUBLISH_ENABLED to "true"
-    # (Settings > Secrets and variables > Actions > Variables).
-    if: ${{ vars.MAVEN_PUBLISH_ENABLED == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
