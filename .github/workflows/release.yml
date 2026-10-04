@@ -1,9 +1,18 @@
 name: Release
 
-# Push a tag such as v1.0.0 to build, test and publish that version.
+# Two ways to release:
+#  - push a tag such as v1.0.0, or
+#  - run this workflow manually (Actions > Release > Run workflow) on `main` with a version such
+#    as 1.0.0: the tag is then created by the GitHub Release step, after the tests passed.
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without "v" (e.g. 1.0.0 or 1.0.0-rc.1)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -15,18 +24,34 @@ jobs:
     timeout-minutes: 30
     outputs:
       version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Read version from the tag
+      - name: Read version from the tag (or the manual input)
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+              echo "::error::Manual releases must run on main (selected: $GITHUB_REF)"
+              exit 1
+            fi
+            TAG="v${INPUT_VERSION#v}"
+            if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
+              echo "::error::Tag $TAG already exists"
+              exit 1
+            fi
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
           if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$ ]]; then
             echo "::error::Tag '$TAG' is not a Semantic Version like v1.2.3 or v1.2.3-rc.1"
             exit 1
           fi
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - uses: gradle/actions/wrapper-validation@v4
 
@@ -72,7 +97,9 @@ jobs:
       - name: Create the GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: ${{ github.ref_name }}
+          tag_name: ${{ needs.build.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: ${{ needs.build.outputs.tag }}
           files: dist/*
           generate_release_notes: true
           prerelease: ${{ contains(needs.build.outputs.version, '-') }}

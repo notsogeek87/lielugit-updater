@@ -395,6 +395,7 @@ Changes are listed in [CHANGELOG.md](CHANGELOG.md).
    git tag -a v1.0.0 -m "v1.0.0"
    git push origin v1.0.0
    ```
+   *No git access to push tags?* Run it from GitHub instead: **Actions → Release → Run workflow** on `main`, with `version` = `1.0.0`. The workflow creates the tag itself once the tests pass.
 3. The **Release** workflow runs the tests, builds the AAR, then creates the GitHub Release with
    `lielugit-updater-1.0.0.aar` and `lielugit-updater-1.0.0-maven.zip`. No release is created if a test fails.
    The Gradle version is taken from the tag (`-PVERSION_NAME=1.0.0`); `VERSION_NAME` in `gradle.properties` only matters for local builds.
