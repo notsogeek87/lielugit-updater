@@ -1,5 +1,7 @@
 # Use LieluGit Updater in another project (with Claude Code)
 
+> Auto-update playbook (full guide to wiring self-updates into an app): [auto-update-playbook.md](auto-update-playbook.md)
+
 ## Fastest way: no token, no setup (copy-paste into Claude Code)
 
 Every release publishes a **public** Maven repository as a file

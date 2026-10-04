@@ -75,6 +75,8 @@ Put `gpr.user` / `gpr.token` in `~/.gradle/gradle.properties` (or the `GPR_USER`
 
 > **Step-by-step guide, including a ready-to-paste prompt for Claude Code: [docs/USING_IN_ANOTHER_PROJECT.md](docs/USING_IN_ANOTHER_PROJECT.md).**
 
+> **Auto-update playbook: [docs/auto-update-playbook.md](docs/auto-update-playbook.md).**
+
 ### From a release file (no account needed)
 
 Every GitHub Release of this repository carries `lielugit-updater-<version>.aar` and
