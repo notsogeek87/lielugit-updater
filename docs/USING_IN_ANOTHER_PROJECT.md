@@ -1,5 +1,30 @@
 # Use LieluGit Updater in another project (with Claude Code)
 
+## Fastest way: no token, no setup (copy-paste into Claude Code)
+
+Every release publishes a **public** Maven repository as a file
+(`lielugit-updater-<version>-maven.zip`). Downloading it needs no account and no token.
+Paste this in Claude Code, opened in the app project (change `1.0.0` to pick another version):
+
+```text
+Ajoute la bibliothèque lielugit-updater 1.0.0 à cette app Android, SANS jeton ni compte :
+
+1. Télécharge le dépôt Maven public de la release et décompresse-le dans le projet :
+   mkdir -p libs/lielugit-maven && curl -fsSL -o /tmp/lielugit.zip https://github.com/notsogeek87/lielugit-updater/releases/download/v1.0.0/lielugit-updater-1.0.0-maven.zip && unzip -oq /tmp/lielugit.zip -d libs/lielugit-maven
+2. Dans settings.gradle.kts, dans dependencyResolutionManagement { repositories { ... } }, ajoute :
+   maven { url = uri("$rootDir/libs/lielugit-maven"); content { includeGroup("com.lielu") } }
+3. Dans app/build.gradle.kts, ajoute : implementation("com.lielu:lielugit-updater:1.0.0")
+4. Garde libs/lielugit-maven dans git (vérifie qu'il n'est pas dans .gitignore).
+5. Branche la vérification de mise à jour avec UpdateManager(context, UpdateConfig(githubOwner = "...", githubRepository = "...")) en utilisant le dépôt GitHub de CETTE app (pas celui de la bibliothèque), avec ma propre interface. Documentation : https://github.com/notsogeek87/lielugit-updater/blob/main/README.md
+6. Vérifie que le projet compile.
+```
+
+To upgrade later, run the same command with the new version number (the old folder can be deleted).
+
+The rest of this page describes the alternative using GitHub Packages, which needs a token.
+
+---
+
 Three steps: **(1) create a token once, (2) store it once, (3) paste a prompt into Claude Code in the
 app you want to update.** Steps 1 and 2 are never repeated for the next apps.
 
