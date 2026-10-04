@@ -56,8 +56,8 @@ dependencyResolutionManagement {
             credentials {
                 // GitHub Packages requires authentication even for public packages:
                 // a personal access token (classic) with the `read:packages` scope.
-                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_ACTOR")
-                password = providers.gradleProperty("gpr.token").orNull ?: System.getenv("GITHUB_TOKEN")
+                username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GPR_USER")
+                password = providers.gradleProperty("gpr.token").orNull ?: System.getenv("GPR_TOKEN")
             }
         }
     }
@@ -71,7 +71,9 @@ dependencies {
 }
 ```
 
-Put `gpr.user` / `gpr.token` in `~/.gradle/gradle.properties`, never in the repository.
+Put `gpr.user` / `gpr.token` in `~/.gradle/gradle.properties` (or the `GPR_USER` / `GPR_TOKEN` environment variables), never in the repository.
+
+> **Step-by-step guide, including a ready-to-paste prompt for Claude Code: [docs/USING_IN_ANOTHER_PROJECT.md](docs/USING_IN_ANOTHER_PROJECT.md).**
 
 ### From a release file (no account needed)
 
