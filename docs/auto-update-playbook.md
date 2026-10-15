@@ -35,6 +35,13 @@ maven {
 Add the dependency (version catalog if the project has one), keep `libs/lielugit-maven` in git (check
 `.gitignore`). Upgrading = replace the folder with the new zip and bump the version.
 
+## 1b. Download and install stay inside the app (never a browser)
+
+The update dialog must call `UpdateManager.check()` → `download()` → `install()`. Do **not** open the
+release page or `browser_download_url` with `ACTION_VIEW`/`Uri.parse(...)` or a WebView/Custom Tab: the
+library downloads the APK itself (progress included) and hands it to the system package installer via a
+`content://` FileProvider URI. The user never leaves the app except for Android's own install screen.
+
 ## 2. Versioning that Android and the library both accept
 
 - `versionCode` must **strictly increase** on every published APK, or Android refuses the update.
