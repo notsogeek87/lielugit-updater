@@ -54,7 +54,10 @@ internal class HttpUrlConnectionTransport(
                 .filterKeys { it != null }
                 .mapKeys { it.key.lowercase() }
                 .mapValues { it.value.lastOrNull().orEmpty() }
-            val length = connection.contentLengthLong.takeIf { it >= 0 }
+            // getContentLengthLong() demande l'API 24 (minSdk 21) : on lit l'en-tête nous-mêmes,
+            // avec repli sur getContentLength() (Int, suffisant pour un APK).
+            val length = responseHeaders["content-length"]?.trim()?.toLongOrNull()?.takeIf { it >= 0 }
+                ?: connection.contentLength.toLong().takeIf { it >= 0 }
 
             return object : HttpResponse(code, responseHeaders, length, body) {
                 override fun close() {
