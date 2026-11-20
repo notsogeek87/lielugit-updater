@@ -4,7 +4,7 @@ kotlin = "2.1.21"
 coroutines = "1.10.2"
 androidxCore = "1.15.0"
 junit = "4.13.2"
-orgJson = "20250107"
+orgJson = "20260719"
 
 [libraries]
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
